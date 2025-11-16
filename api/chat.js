@@ -1,4 +1,6 @@
-const documentStore = { docs: [], chunks: [] };
+if (!global.documentStore) {
+  global.documentStore = { docs: [], chunks: [] };
+}
 
 function searchChunks(query, store) {
   const queryLower = query.toLowerCase();
@@ -16,7 +18,7 @@ function searchChunks(query, store) {
   return scored.slice(0, 3).filter(s => s.score > 0);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

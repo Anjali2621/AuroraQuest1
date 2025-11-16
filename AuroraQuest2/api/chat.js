@@ -45,12 +45,5 @@ export default async function handler(req, res) {
   
   return res.json({ answer });
 }
-```
 
----
 
-## 🚀 **After Fixing, Try This Test:**
-
-After you commit the fix, visit:
-```
-https://aurora-quest1-7b....vercel.app/api/test

@@ -1,8 +1,8 @@
-import formidable from 'formidable';
-import fs from 'fs';
-import pdfParse from 'pdf-parse';
+const formidable = require('formidable');
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
 
-export const config = {
+module.exports.config = {
   api: { bodyParser: false }
 };
 
@@ -20,7 +20,7 @@ function chunkText(text, maxChars = 1000) {
   return chunks;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

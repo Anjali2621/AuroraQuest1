@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "public": true,
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
@@ -10,3 +12,4 @@
     }
   }
 }
+

@@ -1341,82 +1341,89 @@
             if (e.key === 'Enter') sendMessage();
         });
 
-        // REAL AI CHAT USING YOUR PDF CONTENT (TF-IDF RAG)
-        async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            const chatMessages = document.getElementById('chatMessages');
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = "message user";
-            userMsg.innerHTML = `<div class="message-content">${message}</div>`;
-            chatMessages.appendChild(userMsg);
-            input.value = "";
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            const aiMsg = document.createElement('div');
-            aiMsg.className = "message ai";
-            aiMsg.innerHTML = `<div class="message-content">🤔 Searching your study material...</div>`;
-            chatMessages.appendChild(aiMsg);
-            
-            try {
-                const res = await fetch("/api/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        message,
-                        docs: window.currentDocs || []
-                    })
-                });
-                
-                const data = await res.json();
-                if (data.error) {
-                    aiMsg.innerHTML = `<div class="message-content">❌ ${data.error}</div>`;
-                } else {
-                    aiMsg.innerHTML = `<div class="message-content">${data.answer.replace(/\n/g, "<br>")}</div>`;
-                }
-            } catch {
-                aiMsg.innerHTML = `<div class="message-content">❌ Network error</div>`;
-            }
-            
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+        // REAL AI CHAT USING RAG
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    const chatMessages = document.getElementById('chatMessages');
+
+    // user msg
+    const userMsg = document.createElement('div');
+    userMsg.className = "message user";
+    userMsg.innerHTML = `<div class="message-content">${message}</div>`;
+    chatMessages.appendChild(userMsg);
+
+    input.value = "";
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // thinking msg
+    const aiMsg = document.createElement('div');
+    aiMsg.className = "message ai";
+    aiMsg.innerHTML = `<div class="message-content">🤔 Searching your study material...</div>`;
+    chatMessages.appendChild(aiMsg);
+
+    try {
+        const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message,
+                docs: window.currentDocs || []
+            })
+        });
+
+        const data = await res.json();
+        if (data.error) {
+            aiMsg.innerHTML = `<div class="message-content">❌ ${data.error}</div>`;
+        } else {
+            aiMsg.innerHTML = `<div class="message-content">${data.answer.replace(/\n/g, "<br>")}</div>`;
         }
+    } catch (err) {
+        aiMsg.innerHTML = `<div class="message-content">❌ Network error</div>`;
+    }
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
 
+// REAL FILE UPLOAD (WORKING)
+async function uploadFileHandler(e) {
+    const file = e.target.files[0];
+    if (!file) return;
 
-        // REAL FILE UPLOAD HANDLER (RAG)
-        async function uploadFileHandler(e) {
-            const files = e.target.files;
-            if (!files || files.length === 0) return;
-            const file = files[0];
-            
-            const fd = new FormData();
-            fd.append("file", file);
-            
-            const chatMessages = document.getElementById('chatMessages');
-            const aiMsg = document.createElement('div');
-            aiMsg.className = "message ai";
-            aiMsg.innerHTML = `<div class="message-content">📚 Uploading "${file.name}"... please wait</div>`;
-            chatMessages.appendChild(aiMsg);
-            
-            try {
-                const res = await fetch("/api/upload", { method: "POST", body: fd });
-                const data = await res.json();
-                
-                if (data.error) {
-                    aiMsg.innerHTML = `<div class="message-content">❌ Upload failed: ${data.error}</div>`;
-                } else {
-                    aiMsg.innerHTML = `<div class="message-content">✨ Uploaded: ${data.name}<br>📌 Processed ${data.chunks} chunks</div>`;
-                    window.currentDocs = window.currentDocs || [];
-                    window.currentDocs.push(data.id);
-                }
-            } catch (err) {
-                aiMsg.innerHTML = `<div class="message-content">❌ Network error while uploading</div>`;
-            }
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const chatMessages = document.getElementById('chatMessages');
+    const aiMsg = document.createElement('div');
+    aiMsg.className = "message ai";
+    aiMsg.innerHTML = `<div class="message-content">📚 Uploading "${file.name}"... please wait</div>`;
+    chatMessages.appendChild(aiMsg);
+
+    try {
+        const res = await fetch("/api/upload", {
+            method: "POST",
+            body: fd
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+            aiMsg.innerHTML = `<div class="message-content">❌ Upload failed: ${data.error}</div>`;
+        } else {
+            aiMsg.innerHTML = `<div class="message-content">✨ Uploaded: ${data.name}<br>📌 Processed ${data.chunks} chunks</div>`;
+            window.currentDocs = window.currentDocs || [];
+            window.currentDocs.push(data.id);
         }
-        document.getElementById('fileInput').addEventListener('change', uploadFileHandler);
+    } catch (err) {
+        aiMsg.innerHTML = `<div class="message-content">❌ Network error while uploading</div>`;
+    }
+}
+
+document.getElementById('fileInput').addEventListener('change', uploadFileHandler);
+
 
 // Calendar functionality
 let currentMonth = 10; // November (0-indexed)
@@ -1531,4 +1538,5 @@ if (document.getElementById('calendarGrid')) {
 
     </script>
 </body>
+
 </html>
